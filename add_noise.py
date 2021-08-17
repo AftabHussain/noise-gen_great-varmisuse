@@ -60,7 +60,7 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
         for line in file_in:
             jline = json.loads(line)
             if str(jline["has_bug"]).upper()=="TRUE":
-              if (random.randint(1,100) < 51) and noise_count < threshold:
+              if (random.randint(1,100) < 51) :
                 #print(noise_count, threshold, "adding noise") 
                 jline = add_noise(jline, file_op)
                 noise_count+=1 
@@ -68,6 +68,11 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
             json.dump(jline, file_op)
             file_op.write("\n")
         file_op.close()
+        if noise_count > threshold:
+           print("Threshold reached!")
+           return True
+        else:
+           return False
 
 if __name__ == "__main__":
 
@@ -80,15 +85,20 @@ if __name__ == "__main__":
   total_samples = sys.argv[4]
 
   # Fraction of buggy samples to which noise is to be added
-  threshold = 500 * int(noise_level) / 100
+  threshold = int(total_samples) * int(noise_level) / 100
 
   out_dir = ip_dir_name + "_noisy" + str(noise_level) + "_" + str(trial_no)
   os.system("mkdir " + out_dir)
+ 
+  threshold_reached = False
 
   for filename in glob.glob('./' + ip_dir_name + '/*'):
     print(filename)
-    proc_file(filename, ip_dir_name, noise_level, trial_no, out_dir)
-  
-  print("No. of files to which noise added: ", noise_count)
+    if threshold_reached == False:
+      threshold_reached = proc_file(filename, ip_dir_name, noise_level, trial_no, out_dir)
+    else:
+      os.system("cp -frv " + filename + " " + out_dir)
+      
+  print("No. of samples to which noise added: ", noise_count)
 
 
