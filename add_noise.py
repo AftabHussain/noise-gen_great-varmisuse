@@ -48,8 +48,7 @@ def add_noise(jline, file_op):
   # Save the noisy data
   jline["error_location"] = error_location_noisy
   jline["repair_targets"] = repair_targets_noisy
-  json.dump(jline, file_op)
-  file_op.write("\n")
+  return jline
 
 # The function for deciding whether or not to add noise to a sample in a file
 def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
@@ -60,10 +59,12 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
         file_op = open(out_dir + "/" + filename_parts[len(filename_parts)-1], "a")
         for line in file_in:
             jline = json.loads(line)
-            if str(jline["has_bug"])=="True":
+            if str(jline["has_bug"])=="true":
               if (random.randint(1,100) < 50) and noise_count < threshold:
                 #print(noise_count, threshold, "adding noise") 
-                add_noise(jline, file_op)
+                jline = add_noise(jline, file_op)
+                json.dump(jline, file_op)
+                file_op.write("\n")
                 noise_count+=1 
             else:
                 #print(noise_count, threshold, "skipped") 
@@ -90,5 +91,7 @@ if __name__ == "__main__":
   for filename in glob.glob('./' + ip_dir_name + '/*'):
     print(filename)
     proc_file(filename, ip_dir_name, noise_level, trial_no, out_dir)
+  
+  print("No. of files to which noise added: ", noise_count)
 
 
