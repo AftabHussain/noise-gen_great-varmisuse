@@ -39,8 +39,8 @@ if __name__ == "__main__":
             print(json_sample)
             noisy_sample = None
             if json_sample["has_bug"]:
-                noisy_sample = buggy_to_correct(json_sample)
+                noisy_sample = buggy_to_correct(json_sample.copy())
             else:
-                noisy_sample = correct_to_buggy(json_sample)
+                noisy_sample = correct_to_buggy(json_sample.copy())
             print(noisy_sample)
             break
