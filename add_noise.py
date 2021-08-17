@@ -59,17 +59,14 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
         file_op = open(out_dir + "/" + filename_parts[len(filename_parts)-1], "a")
         for line in file_in:
             jline = json.loads(line)
-            if str(jline["has_bug"])=="true":
-              if (random.randint(1,100) < 50) and noise_count < threshold:
+            if str(jline["has_bug"]).upper()=="TRUE":
+              if (random.randint(1,100) < 51) and noise_count < threshold:
                 #print(noise_count, threshold, "adding noise") 
                 jline = add_noise(jline, file_op)
-                json.dump(jline, file_op)
-                file_op.write("\n")
                 noise_count+=1 
-            else:
-                #print(noise_count, threshold, "skipped") 
-                json.dump(jline, file_op)
-                file_op.write("\n")
+            #print(noise_count, threshold, "skipped") 
+            json.dump(jline, file_op)
+            file_op.write("\n")
         file_op.close()
 
 if __name__ == "__main__":
