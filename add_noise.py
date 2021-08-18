@@ -52,10 +52,10 @@ if __name__ == "__main__":
   total_samples = sys.argv[4]              # Total Number of Samples               
 
   # Fraction of buggy samples to which noise is to be added
-  noise_on_buggy_thresh = int(total_samples) * 0.75 * int(noise_level) / 100
+  noise_on_buggy_thresh = int(total_samples) * 0.5 * int(noise_level) / 100
 
   # Fraction of correct samples to which noise is to be added
-  noise_on_correct_thresh = int(total_samples) * 0.25  * int(noise_level) / 100
+  noise_on_correct_thresh = int(total_samples) * 0.5  * int(noise_level) / 100
 
   out_dir = ip_dir_name + "_noisy" + str(noise_level) + "_" + str(trial_no)
   os.system("mkdir " + out_dir)
