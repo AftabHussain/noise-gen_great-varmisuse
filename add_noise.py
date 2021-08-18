@@ -23,11 +23,11 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
         for line in file_in:
             jline = json.loads(line)
             if jline["has_bug"]== True:
-              if (random.randint(1,100) < 51) :
+              if (random.randint(1,100) < int(noise_level) + 1) and noise_on_buggy < noise_on_buggy_thresh:
                 jline = buggy_to_correct(jline)      # noisify buggy
                 noise_on_buggy += 1 
             elif jline["has_bug"] == False:
-              if (random.randint(1,100) < 51) :
+              if (random.randint(1,100) < int(noise_level) + 1) and noise_on_correct < noise_on_correct_thresh:
                 jline = correct_to_buggy(jline)      # noisify correct
                 noise_on_correct += 1 
             json.dump(jline, file_op)
@@ -35,7 +35,7 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
         file_op.close()
 
         # Stopping criterion
-        if noise_on_buggy > noise_on_buggy_thresh and noise_on_correct > noise_on_correct_thresh:
+        if noise_on_buggy >= noise_on_buggy_thresh and noise_on_correct >= noise_on_correct_thresh:
            print("Noise Thresholds reached!")
            return True
         else:
