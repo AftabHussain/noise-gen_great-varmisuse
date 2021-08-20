@@ -95,9 +95,9 @@ if __name__ == "__main__":
               data_set = batch_ids[0].split("_")[0].split("-")[0]
 
               if (data_set == "train"):
-                print(*sample, sep = ", ", file=f_train)
+                print(*sample, sep = ", ", file = f_train)
               elif (data_set == "dev"):
-                print(*sample, sep = ", ", file=f_dev)
+                print(*sample, sep = ", ", file = f_dev)
      
             batch_ids.clear()
             batch_loc_prob.clear()
