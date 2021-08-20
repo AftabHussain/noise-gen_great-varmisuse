@@ -6,6 +6,8 @@
 if __name__ == "__main__":
 
   for step in range(1,9):
+    f_train = open("log_train_ep"+str(step)+".txt", "a")
+    f_dev = open("log_dev_ep"+str(step)+".txt", "a")
 
     with open("step_" + str(step) + "_output.txt") as file_in:
 
@@ -89,10 +91,21 @@ if __name__ == "__main__":
             # At this point, batch data reading is complete.
             # print data in the format: #samp_id, #samp_loc_prob, #samp_loc_loss, #samp_tgt_prob, #samp_tgt_loss
             for sample in list(zip(batch_ids, batch_loc_prob, batch_loc_loss, batch_tgt_prob, batch_tgt_loss)):
-              print(*sample, sep = ", ")
+
+              data_set = batch_ids[0].split("_")[0].split("-")[0]
+
+              if (data_set == "train"):
+                print(*sample, sep = ", ", file=f_train)
+              elif (data_set == "dev"):
+                print(*sample, sep = ", ", file=f_dev)
+     
             batch_ids.clear()
             batch_loc_prob.clear()
             batch_loc_loss.clear()
             batch_tgt_prob.clear()
             batch_tgt_loss.clear()
+
+    print("Logs generated for Epoch (Step):" + str(step))
+    f_train.close()
+    f_dev.close()
 
