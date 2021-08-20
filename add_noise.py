@@ -72,4 +72,11 @@ if __name__ == "__main__":
   print("No. of buggy samples to which noise was added: ", noise_on_buggy)
   print("No. of correct samples to which noise was added: ", noise_on_correct)
 
+  with open (out_dir + "_log", "w") as f:
+    f.write("\nNo. of buggy samples to which noise was added: " + str(noise_on_buggy))
+    f.write("\nNo. of correct samples to which noise was added: " + str(noise_on_correct))
+    f.close()
+
+
+
 
