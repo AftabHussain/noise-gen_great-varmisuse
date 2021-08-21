@@ -1,15 +1,40 @@
+import json
+import glob
+from pathlib import Path
+
 # Reference(s):
 # https://www.kite.com/python/answers/how-to-print-a-list-without-brackets-in-python#:~:text=Use%20*%20to%20print%20a%20list,set%20sep%20to%20%22%2C%20%22%20.
 
 # This program generates a csv output from step_X_output.txt files that are generated (per step) while running the GREAT model.
 
-if __name__ == "__main__":
+INPUT_DIRS = ['test-1', 'test-2']
+TOTAL_STEPS = 1
+bug_map = {}
 
-  for step in range(1,9):
-    f_train = open("log_train_ep"+str(step)+".txt", "a")
-    f_dev = open("log_dev_ep"+str(step)+".txt", "a")
+def load_dataset(dataset):
+  global bug_map
+  for filename in Path("./" + dataset + "/").glob("*"):
+    filename = filename.name
+    print(filename)
+    with open(dataset + "/" + filename, "r") as file_in:
+          lines = []
+          filename_parts = filename.split("/")
+          for line in file_in:
+              jline = json.loads(line)
+              bug_map[jline["line_no"]] = jline["has_bug"]
 
-    with open("step_" + str(step) + "_output.txt") as file_in:
+  '''
+  for key, value in bug_map.items() :
+    print (key, value)
+  '''
+
+def generate_logs(input_dir):
+
+  for step in range(1,TOTAL_STEPS+1):
+    f_train = open(input_dir + "/log_train_ep"+str(step)+".txt", "a")
+    f_dev = open(input_dir + "/log_dev_ep"+str(step)+".txt", "a")
+
+    with open(input_dir + "/step_" + str(step) + "_output.txt") as file_in:
 
       lines = []
       batch_ids = []
@@ -90,14 +115,15 @@ if __name__ == "__main__":
              
             # At this point, batch data reading is complete.
             # print data in the format: #samp_id, #samp_loc_prob, #samp_loc_loss, #samp_tgt_prob, #samp_tgt_loss
+            global bug_map
             for sample in list(zip(batch_ids, batch_loc_prob, batch_loc_loss, batch_tgt_prob, batch_tgt_loss)):
-
+              has_bug_val = bug_map[batch_ids[0]]
+              #print(has_bug_val)
               data_set = batch_ids[0].split("_")[0].split("-")[0]
-
               if (data_set == "train"):
-                print(*sample, sep = ", ", file = f_train)
+                print(*sample, has_bug_val, sep = ", ", file = f_train)
               elif (data_set == "dev"):
-                print(*sample, sep = ", ", file = f_dev)
+                print(*sample, has_bug_val, sep = ", ", file = f_dev)
      
             batch_ids.clear()
             batch_loc_prob.clear()
@@ -105,7 +131,15 @@ if __name__ == "__main__":
             batch_tgt_prob.clear()
             batch_tgt_loss.clear()
 
-    print("Logs generated for Epoch (Step):" + str(step))
+    print(f_train.name)
+    print(f_dev.name)
     f_train.close()
     f_dev.close()
 
+if __name__ == "__main__":
+
+  load_dataset("dev")
+  load_dataset("train")
+  
+  for input_dir in INPUT_DIRS:
+    generate_logs(input_dir)
