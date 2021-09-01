@@ -8,10 +8,12 @@ import sys
 
 # This program generates a csv output from step_X_output.txt files that are generated (per step) while running the GREAT model.
 
-INPUT_DIRS = ['noise0_1']
+INPUT_DIRS = ['GREAT-Aftab']
 TRAIN_SET = "train" 
 TOTAL_STEPS = 50
 bug_map = {}
+source_tokens_len_map = {}
+repair_cands_len_map = {}
 
 def load_dataset(dataset):
   global bug_map
@@ -27,19 +29,33 @@ def load_dataset(dataset):
               jline = json.loads(line)
               key = jline["line_no"]
               bug_map[key] = jline["has_bug"]
+              source_tokens_len_map[key] = (len(jline["source_tokens"]))
+              repair_cands_len=0
+              for candidate in jline["repair_candidates"]: 
+                if isinstance(candidate, int):
+                   repair_cands_len += 1
+              repair_cands_len_map[key] = repair_cands_len 
 
-  '''
-  for key, value in bug_map.items() :
-    print (key, value)
-  '''
    
 def generate_logs(input_dir):
 
-  global bug_map
+  global bug_map, source_token_len_map 
+
+  # Files (in csv) for storing info on the samples (We only need to process
+  # step files of one epoch to get the ids of the samples that were picked from
+  # the train and dev sets.)
+  f_dev_data = open(input_dir + "/log_dev_data"+".txt", "a")
+  print("#samp_id, #has_bug, #num_of_src_tokens, #num_of_rep_candidates", file = f_dev_data)
+  f_train_data = open(input_dir + "/log_train_data"+".txt", "a")
+  print("#samp_id, #has_bug, #num_of_src_tokens, #num_of_rep_candidates", file = f_train_data)
 
   for step in range(1,TOTAL_STEPS+1):
+                
+    # Files (in csv) for storing per epoch stats for each sample. 
     f_train = open(input_dir + "/log_train_ep"+str(step)+".txt", "a")
+    print("#samp_id, #samp_loc_prob, #samp_loc_loss, #samp_tgt_prob, #samp_tgt_loss", file = f_train)
     f_dev = open(input_dir + "/log_dev_ep"+str(step)+".txt", "a")
+    print("#samp_id, #samp_loc_prob, #samp_loc_loss, #samp_tgt_prob, #samp_tgt_loss", file = f_dev)
 
     with open(input_dir + "/step_" + str(step) + "_output.txt") as file_in:
 
@@ -123,14 +139,20 @@ def generate_logs(input_dir):
           if parts[0]=="TGT_LOSS_SAMP_END":
             # At this point, batch data reading is complete.
             # print data in the format: 
-            # #samp_id,#samp_loc_prob,#samp_loc_loss,#samp_tgt_prob,#samp_tgt_loss,#has_bug
             for sample in list(zip(batch_ids, batch_loc_prob, batch_loc_loss, batch_tgt_prob, batch_tgt_loss)):
               has_bug_val = bug_map[sample[0]]
+              source_tokens_len = source_tokens_len_map[sample[0]]
+              repair_cands_len = repair_cands_len_map[sample[0]]
               data_set = sample[0].split("_")[0].split("-")[0]
               if (data_set == "train"):
-                print(*sample, has_bug_val, sep = ", ", file = f_train)
+                print(*sample, sep = ", ", file = f_train)
+                if step ==1: 
+                  print(sample[0], has_bug_val, source_tokens_len, repair_cands_len, sep = ", ", file = f_train_data)
               elif (data_set == "dev"):
-                print(*sample, has_bug_val, sep = ", ", file = f_dev)
+                print(*sample, sep = ", ", file = f_dev)
+                if step ==1: 
+                  print(sample[0], has_bug_val, source_tokens_len, repair_cands_len, sep = ", ", file = f_dev_data)
+
      
             batch_ids.clear()
             batch_loc_prob.clear()
@@ -142,6 +164,8 @@ def generate_logs(input_dir):
     print(f_dev.name)
     f_train.close()
     f_dev.close()
+  f_train_data.close()
+  f_dev_data.close()
 
 if __name__ == "__main__":
 
