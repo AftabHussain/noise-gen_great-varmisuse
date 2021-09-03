@@ -3,7 +3,7 @@ import glob
 from pathlib import Path
 import sys
 
-INPUT_DIRS = ['GREAT-Aftab']
+INPUT_DIRS = ['']
 
 step_no = -1
 
