@@ -44,6 +44,33 @@ def add_noise(jline):
   jline["repair_targets"] = repair_targets_noisy
   return jline
 
+def add_x_noise_to_correct(sample):
+    # print("-------------------------------------------------------------------")
+    # print("Source tokens", sample["source_tokens"])
+    # print("Check", max(set(sample["source_tokens"]), key = sample["source_tokens"].count))
+    most_freq_token = max(set(sample["source_tokens"]), key = sample["source_tokens"].count)
+    for i in range(len(sample["source_tokens"])):
+        if sample["source_tokens"][i]==most_freq_token:
+            sample["source_tokens"][i]="NONBUGGY"
+    # print("Source tokens", sample["source_tokens"])
+    return sample
+
+
+def add_x_noise_to_buggy(sample):
+    # print("-------------------------------------------------------------------")
+    # print("Source tokens", sample["source_tokens"])
+    # print("Repair Targets", sample["repair_targets"])
+    repair_target_var = sample["source_tokens"][sample["repair_targets"][0]]
+    # print("repair_target_var: ",repair_target_var)
+    for i in range(len(sample["source_tokens"])):
+        if sample["source_tokens"][i]==repair_target_var:
+            sample["source_tokens"][i]="TARGET"
+    # print(sample["source_tokens"][sample["error_location"]])
+    sample["source_tokens"][sample["error_location"]]="BUGGY"
+    # print("Error Loc", sample["error_location"])
+    # print("Source tokens", sample["source_tokens"])
+    return sample
+
 def buggy_to_correct(sample):
     sample["has_bug"] = False
     sample["bug_kind"] = 0
