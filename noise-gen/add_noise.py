@@ -24,13 +24,17 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
             jline = json.loads(line)
             if jline["has_bug"]== True:
               if (random.randint(1,100) < int(noise_level) + 1) and noise_on_buggy < noise_on_buggy_thresh:
-                jline = add_x_noise_to_buggy(jline)    # noisify buggy (x noise)
-                # jline = buggy_to_correct(jline)      # noisify buggy (y noise)
-                noise_on_buggy += 1 
+                try:
+                  # jline = add_x_noise_to_buggy(jline)    # noisify buggy (x noise)
+                  jline = buggy_to_correct(jline)      # noisify buggy (y noise)
+                  noise_on_buggy += 1 
+                except:
+                  print("Exception, ignoring sample")
+                  return
             elif jline["has_bug"] == False:
               if (random.randint(1,100) < int(noise_level) + 1) and noise_on_correct < noise_on_correct_thresh:
-                jline = add_x_noise_to_correct(jline)  # noisify correct (x noise)
-                # jline = correct_to_buggy(jline)      # noisify correct (y noise)
+                # jline = add_x_noise_to_correct(jline)  # noisify correct (x noise)
+                jline = correct_to_buggy(jline)      # noisify correct (y noise)
                 noise_on_correct += 1 
             json.dump(jline, file_op)
             file_op.write("\n")
@@ -54,10 +58,10 @@ if __name__ == "__main__":
   total_samples = sys.argv[4]              # Total Number of Samples               
 
   # Fraction of buggy samples to which noise is to be added
-  noise_on_buggy_thresh = int(total_samples) * 0.5 * int(noise_level) / 100
+  noise_on_buggy_thresh = int(total_samples) * int(noise_level) / 100
 
   # Fraction of correct samples to which noise is to be added
-  noise_on_correct_thresh = int(total_samples) * 0.5  * int(noise_level) / 100
+  noise_on_correct_thresh = int(total_samples) * int(noise_level) / 100
 
   out_dir = ip_dir_name + "_noisy" + str(noise_level) + "_" + str(trial_no)
   os.system("mkdir " + out_dir)
