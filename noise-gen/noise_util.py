@@ -60,6 +60,8 @@ def add_x_noise_to_buggy(sample):
     # print("-------------------------------------------------------------------")
     # print("Source tokens", sample["source_tokens"])
     # print("Repair Targets", sample["repair_targets"])
+    if(len(sample["repair_targets"])==0):
+        print("This buggy sample has no repair targets!")
     repair_target_var = sample["source_tokens"][sample["repair_targets"][0]]
     # print("repair_target_var: ",repair_target_var)
     for i in range(len(sample["source_tokens"])):

@@ -25,16 +25,16 @@ def proc_file(filename, dir_name, noise_level, trial_no, out_dir):
             if jline["has_bug"]== True:
               if (random.randint(1,100) < int(noise_level) + 1) and noise_on_buggy < noise_on_buggy_thresh:
                 try:
-                  # jline = add_x_noise_to_buggy(jline)    # noisify buggy (x noise)
-                  jline = buggy_to_correct(jline)      # noisify buggy (y noise)
+                  jline = add_x_noise_to_buggy(jline)    # noisify buggy (x noise)
+                  #jline = buggy_to_correct(jline)      # noisify buggy (y noise)
                   noise_on_buggy += 1 
-                except:
+                except Exception as e:
                   print("Exception, ignoring sample")
-                  return
+                  continue
             elif jline["has_bug"] == False:
               if (random.randint(1,100) < int(noise_level) + 1) and noise_on_correct < noise_on_correct_thresh:
-                # jline = add_x_noise_to_correct(jline)  # noisify correct (x noise)
-                jline = correct_to_buggy(jline)      # noisify correct (y noise)
+                jline = add_x_noise_to_correct(jline)  # noisify correct (x noise)
+                #jline = correct_to_buggy(jline)      # noisify correct (y noise)
                 noise_on_correct += 1 
             json.dump(jline, file_op)
             file_op.write("\n")
